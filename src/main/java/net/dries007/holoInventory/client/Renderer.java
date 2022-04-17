@@ -61,7 +61,7 @@ public class Renderer
     private static final DecimalFormat DF_TWO_FRACTION_DIGIT = new DecimalFormat("#.00");
     // changed with an attached debugger..
     static int stackSizeDebugOverride = 0;
-    private static final String[] suffixNormal = {"", EnumChatFormatting.GRAY + "K", EnumChatFormatting.GRAY + "M", EnumChatFormatting.GRAY + "B"};
+    private static final String[] suffixNormal = {"", "K", "M", "B"};
     private static final String[] suffixDarkened = {"", EnumChatFormatting.GRAY + "K", EnumChatFormatting.GRAY + "M", EnumChatFormatting.GRAY + "B"};
     private static final int TEXTCOLOR = 255 + (255 << 8) + (255 << 16) + (170 << 24);
     public static final HashMap<Integer, NamedData<ItemStack[]>> tileMap = new HashMap<>();
