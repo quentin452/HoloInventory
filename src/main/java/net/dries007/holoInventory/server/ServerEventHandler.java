@@ -57,9 +57,9 @@ import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 public class ServerEventHandler {
-    public List<String> banUsers = new ArrayList<>();
-    public HashMap<String, String> overrideUsers = new HashMap<>();
-    public HashMap<Integer, InventoryData> blockMap = new HashMap<>();
+    public final List<String> banUsers = new ArrayList<>();
+    public final HashMap<String, String> overrideUsers = new HashMap<>();
+    public final HashMap<Integer, InventoryData> blockMap = new HashMap<>();
 
     private static class CachedPatternInventory {
         public static int computeHash(IInventory key) {
@@ -79,11 +79,11 @@ public class ServerEventHandler {
             hash = computeHash(key);
         }
 
-        public WeakReference<IInventory> inventory;
-        public int hash;
+        public final WeakReference<IInventory> inventory;
+        public final int hash;
     }
 
-    Map<IInventory, CachedPatternInventory> wrappedInventoryCache = new WeakHashMap<>();
+    final Map<IInventory, CachedPatternInventory> wrappedInventoryCache = new WeakHashMap<>();
     private static final String JUKEBOX_NAME = "Jukebox";
 
     @SubscribeEvent()
@@ -164,7 +164,6 @@ public class ServerEventHandler {
                         TileEntity te = world.getTileEntity(x, y, z);
                         if (Helper.weWant(te)) {
                             checkForChangedType(coord.hashCode(), te);
-                            HoloInventory.getConfig();
                             if (Config.bannedTiles.contains(te.getClass().getCanonicalName())) {
                                 // BANNED THING
                                 cleanup(coord, player);

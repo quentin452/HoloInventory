@@ -26,14 +26,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import net.minecraftforge.common.config.Configuration;
 
 public class Config {
     private static Configuration configuration;
     private final File file;
 
-    public static boolean requireGlasses = true;
+    public static final boolean requireGlasses = true;
     public static boolean colorEnable = false;
     public static int colorAlpha = 200;
     public static int colorR = 14;
@@ -55,9 +54,9 @@ public class Config {
     public static boolean debug = false;
     public static double renderScaling = 1.0;
 
-    public static ArrayList<String> bannedTiles = new ArrayList<>();
-    public static ArrayList<String> bannedEntities = new ArrayList<>();
-    public static HashMap<String, String> nameOverrides = new HashMap<>();
+    public static final ArrayList<String> bannedTiles = new ArrayList<>();
+    public static final ArrayList<String> bannedEntities = new ArrayList<>();
+    public static final HashMap<String, String> nameOverrides = new HashMap<>();
 
     public Config(File file) {
         this.file = file;

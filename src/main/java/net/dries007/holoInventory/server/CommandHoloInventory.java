@@ -44,6 +44,7 @@ public class CommandHoloInventory extends CommandBase {
         return "holoinventory";
     }
 
+    @Override
     public int getRequiredPermissionLevel() {
         return 0;
     }
@@ -58,6 +59,7 @@ public class CommandHoloInventory extends CommandBase {
         return "Use to <reset> local cache, <reload> the config, <(un)ban> tiles and override names.";
     }
 
+    @Override
     public List addTabCompletionOptions(ICommandSender sender, String[] args) {
         switch (args.length) {
             default:
@@ -82,7 +84,7 @@ public class CommandHoloInventory extends CommandBase {
     }
 
     private List<String> getAllList() {
-        ArrayList<String> temp = new ArrayList<String>();
+        ArrayList<String> temp = new ArrayList<>();
         temp.addAll(Config.bannedEntities);
         temp.addAll(Config.bannedTiles);
         return temp;
@@ -108,7 +110,6 @@ public class CommandHoloInventory extends CommandBase {
             if (!(sender instanceof EntityPlayer)) throw new WrongUsageException("You can't use this as the server...");
             HoloInventory.getSnw().sendTo(new ResetMessage(), (EntityPlayerMP) sender);
             for (InventoryData data : ServerHandler.serverEventHandler.blockMap.values()) {
-                //noinspection SuspiciousMethodCalls
                 data.playerSet.remove(sender);
             }
         } else if (args[0].equalsIgnoreCase("reload")) {
