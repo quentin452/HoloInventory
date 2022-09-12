@@ -93,33 +93,32 @@ public class Renderer {
 
     @SubscribeEvent
     public void renderEvent(RenderWorldLastEvent event) {
-        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-        World world = Minecraft.getMinecraft().theWorld;
-
-        ItemStack glasses = HoloGlasses.getHoloGlasses(world, player);
-
+        final EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+        final World world = Minecraft.getMinecraft().theWorld;
+        final ItemStack glasses = HoloGlasses.getHoloGlasses(world, player);
         try {
-            if (Config.requireGlasses && glasses != null && ((IHoloGlasses) glasses.getItem()).shouldRender(glasses))
+            if (!Config.requireGlasses || glasses != null && ((IHoloGlasses) glasses.getItem()).shouldRender(glasses)) {
                 doEvent();
-            else {
-                if (!Config.requireGlasses) doEvent();
             }
         } catch (Exception e) {
             HoloInventory.getLogger().warn("Some error while rendering the hologram :(");
-            HoloInventory.getLogger().warn("Please make an issue on github if this happens.");
-
+            HoloInventory.getLogger().warn("Please make an issue on github if this happens");
             e.printStackTrace();
         }
     }
 
     private void doEvent() {
-        if (!enabled) return;
-        Minecraft mc = Minecraft.getMinecraft();
+        if (!enabled) {
+            return;
+        }
+        final Minecraft mc = Minecraft.getMinecraft();
         if (mc.renderEngine == null
                 || RenderManager.instance == null
                 || RenderManager.instance.getFontRenderer() == null
                 || mc.gameSettings.thirdPersonView != 0
-                || mc.objectMouseOver == null) return;
+                || mc.objectMouseOver == null) {
+            return;
+        }
         coord = new Coord(mc.theWorld.provider.dimensionId, mc.objectMouseOver);
         switch (mc.objectMouseOver.typeOfHit) {
             case BLOCK:
@@ -137,9 +136,13 @@ public class Renderer {
                             coord.y += 0.5;
                             coord.z += 0.5;
                             renderHologram(data);
-                        } else tileMap.remove(coord.hashCode());
+                        } else {
+                            tileMap.remove(coord.hashCode());
+                        }
                     }
-                } else tileMap.remove(coord.hashCode());
+                } else {
+                    tileMap.remove(coord.hashCode());
+                }
                 break;
             case ENTITY:
                 if (!Config.enableEntities) break;
