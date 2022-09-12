@@ -32,7 +32,8 @@ import org.lwjgl.input.Keyboard;
 
 public class KeyManager {
 
-    public static final KeyBinding key = new KeyBinding("HoloGlasses", Keyboard.KEY_NUMPAD5, "key.categories.holoinventory");
+    public static final KeyBinding key =
+            new KeyBinding("HoloGlasses", Keyboard.KEY_NUMPAD5, "key.categories.holoinventory");
 
     public KeyManager() {
         ClientRegistry.registerKeyBinding(key);
@@ -64,9 +65,7 @@ public class KeyManager {
                     if (!alreadyToggling) {
                         alreadyToggling = true;
                         Renderer.INSTANCE.enabled = !Renderer.INSTANCE.enabled;
-                        HoloInventory.getConfig()
-                                .setKeyState(
-                                        Renderer.INSTANCE.enabled);
+                        HoloInventory.getConfig().setKeyState(Renderer.INSTANCE.enabled);
                     }
                 } else {
                     alreadyToggling = false;
