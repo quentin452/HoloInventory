@@ -32,17 +32,10 @@ import org.lwjgl.input.Keyboard;
 
 public class KeyManager {
 
-    public static final KeyBinding key = new KeyBinding("HoloGlasses", 0, "key.categories.holoinventory") {
-        @Override
-        public void setKeyCode(int p_151462_1_) {
-            HoloInventory.getConfig().setKey(p_151462_1_);
-            super.setKeyCode(p_151462_1_);
-        }
-    };
+    public static final KeyBinding key = new KeyBinding("HoloGlasses", 0, "key.categories.holoinventory");
 
     public KeyManager() {
         ClientRegistry.registerKeyBinding(key);
-        key.setKeyCode(HoloInventory.getConfig().getKey());
         switch (Config.keyMode) {
             case 1:
                 Renderer.INSTANCE.enabled = Config.keyState;

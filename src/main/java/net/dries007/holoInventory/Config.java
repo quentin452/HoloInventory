@@ -261,19 +261,6 @@ public class Config {
         save();
     }
 
-    public void setKey(int p_151462_1_) {
-        configuration
-                .get(HoloInventory.MODID, "keyCode", p_151462_1_, "You can set this ingame.")
-                .set(p_151462_1_);
-        save();
-    }
-
-    public int getKey() {
-        return configuration
-                .get(HoloInventory.MODID, "keyCode", 0, "You can set this ingame.")
-                .getInt();
-    }
-
     public void save() {
         if (configuration.hasChanged()) configuration.save();
     }
