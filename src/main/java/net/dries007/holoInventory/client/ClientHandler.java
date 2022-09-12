@@ -21,17 +21,10 @@
 
 package net.dries007.holoInventory.client;
 
-import static net.minecraft.util.EnumChatFormatting.AQUA;
-
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.MinecraftForge;
 
 public class ClientHandler {
@@ -56,27 +49,12 @@ public class ClientHandler {
         }
     };
 
-    public void postInit() {
-        RENDER_ITEM.setRenderManager(RenderManager.instance);
-    }
-
-    public ClientHandler() {}
-
     public void init() {
         MinecraftForge.EVENT_BUS.register(Renderer.INSTANCE);
-        FMLCommonHandler.instance().bus().register(Renderer.INSTANCE);
-
-        MinecraftForge.EVENT_BUS.register(KEY_MANAGER);
         FMLCommonHandler.instance().bus().register(KEY_MANAGER);
     }
 
-    boolean done = false;
-
-    @SubscribeEvent
-    public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (done) return;
-        IChatComponent root = new ChatComponentText("[HoloInventory] ").setChatStyle(new ChatStyle().setColor(AQUA));
-        done = true;
-        event.player.addChatMessage(root);
+    public void postInit() {
+        RENDER_ITEM.setRenderManager(RenderManager.instance);
     }
 }
