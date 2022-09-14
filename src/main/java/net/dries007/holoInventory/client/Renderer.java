@@ -63,7 +63,7 @@ public class Renderer {
     private static final DecimalFormat DF_ONE_FRACTION_DIGIT = new DecimalFormat("##.0");
     private static final DecimalFormat DF_TWO_FRACTION_DIGIT = new DecimalFormat("#.00");
     // changed with an attached debugger..
-    static final int stackSizeDebugOverride = 0;
+    static int stackSizeDebugOverride = 0;
     private static final String[] suffixNormal = {"", "K", "M", "B"};
     private static final String[] suffixDarkened = {
         "", EnumChatFormatting.GRAY + "K", EnumChatFormatting.GRAY + "M", EnumChatFormatting.GRAY + "B"
