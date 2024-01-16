@@ -51,51 +51,95 @@ public class BlockInventoryMessage implements IMessage {
 
         @Override
         public IMessage onMessage(BlockInventoryMessage message, MessageContext ctx) {
-            if (message == null || message.data == null) return null; // hun?
+            if (message == null || message.data == null) {
+                return null;
+            }
+
             if (ctx.side.isClient()) {
                 NBTTagList list = message.data.getTagList(NBT_KEY_LIST, Constants.NBT.TAG_COMPOUND);
+
+                if (list == null) {
+                    return null;
+                }
+
                 ItemStack[] itemStacks = new ItemStack[list.tagCount()];
+
                 for (int i = 0; i < list.tagCount(); i++) {
                     NBTTagCompound tag = list.getCompoundTagAt(i);
+
+                    if (tag == null) {
+                        continue;
+                    }
+
                     itemStacks[i] = ItemStack.loadItemStackFromNBT(tag);
-                    if (itemStacks[i] != null) itemStacks[i].stackSize = tag.getInteger(NBT_KEY_COUNT);
+
+                    if (itemStacks[i] != null) {
+                        itemStacks[i].stackSize = tag.getInteger(NBT_KEY_COUNT);
+                    }
                 }
+
                 NamedData<ItemStack[]> data;
-                if (message.data.hasKey(NBT_KEY_CLASS)) data = new NamedData<>(
-                        message.data.getString(NBT_KEY_NAME),
-                        message.data.getString(NBT_KEY_CLASS),
-                        itemStacks);
-                else data = new NamedData<>(message.data.getString(NBT_KEY_NAME), itemStacks);
+
+                if (message.data.hasKey(NBT_KEY_CLASS)) {
+                    data = new NamedData<>(
+                            message.data.getString(NBT_KEY_NAME),
+                            message.data.getString(NBT_KEY_CLASS),
+                            itemStacks
+                    );
+                } else {
+                    data = new NamedData<>(message.data.getString(NBT_KEY_NAME), itemStacks);
+                }
+
                 if (Config.enableStacking) {
                     List<ItemStack> stacks = new ArrayList<>();
+
                     for (ItemStack stackToAdd : data.data) {
+                        if (stackToAdd == null) {
+                            continue;
+                        }
+
                         if (stackToAdd.stackSize == 0) {
                             stacks.add(stackToAdd);
                             continue;
                         }
-                        int remainingAmount = stackToAdd.stackSize;
-                        for (ItemStack stackInList : stacks) {
-                            if (stackInList == null) continue;
 
-                            if (stackToAdd.isItemEqual(stackInList)
-                                    && ItemStack.areItemStackTagsEqual(stackToAdd, stackInList)) {
+                        int remainingAmount = stackToAdd.stackSize;
+
+                        for (ItemStack stackInList : stacks) {
+                            if (stackInList == null) {
+                                continue;
+                            }
+
+                            if (stackToAdd.isItemEqual(stackInList) &&
+                                    ItemStack.areItemStackTagsEqual(stackToAdd, stackInList)) {
                                 int toMerge = Math.min(remainingAmount, Integer.MAX_VALUE - stackInList.stackSize);
+
                                 if (toMerge > 0) {
                                     stackInList.stackSize += toMerge;
                                     remainingAmount -= toMerge;
                                 }
-                                if (remainingAmount <= 0) break;
+
+                                if (remainingAmount <= 0) {
+                                    break;
+                                }
                             }
                         }
+
                         if (remainingAmount != 0) {
                             ItemStack remainingStack = stackToAdd.copy();
                             remainingStack.stackSize = remainingAmount;
                             stacks.add(remainingStack);
                         }
                     }
+
                     data.data = stacks.toArray(new ItemStack[0]);
                 }
-                Renderer.tileInventoryMap.put(message.data.getInteger(NBT_KEY_ID), data);
+
+                int id = message.data.getInteger(NBT_KEY_ID);
+
+                if (id >= 0) {
+                    Renderer.tileInventoryMap.put(id, data);
+                }
             }
 
             return null;
