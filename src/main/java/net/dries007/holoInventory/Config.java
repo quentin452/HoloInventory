@@ -21,12 +21,14 @@ import java.util.Map;
 
 import net.minecraftforge.common.config.Configuration;
 
+import cpw.mods.fml.common.Loader;
+
 public class Config {
 
     private static Configuration configuration;
     private final File file;
 
-    public static final boolean requireGlasses = true;
+    public static boolean requireGlasses = Loader.isModLoaded("dreamcraft");
     public static boolean colorEnable = false;
     public static int colorAlpha = 200;
     public static int colorR = 14;
@@ -35,6 +37,7 @@ public class Config {
     public static int syncFreq = 2;
     public static boolean renderText = true;
     public static boolean renderSuffixDarkened = true;
+    public static boolean renderThirdPerson = false;
     public static boolean renderMultiple = true;
     public static boolean enableStacking = true;
     public static boolean renderName = true;
@@ -106,8 +109,9 @@ public class Config {
                 .get(HoloInventory.MODID, "renderScaling", renderScaling, "Visual scale factor (0.0-1.0)")
                 .getDouble(1.0);
 
-        // requireGlasses = configuration.get(HoloInventory.MODID, "requireGlasses", requireGlasses,"Makes
-        // HoloInventory require HoloGlasses").getBoolean(true);
+        requireGlasses = configuration
+                .get(HoloInventory.MODID, "requireGlasses", requireGlasses, "Makes HoloInventory require HoloGlasses")
+                .getBoolean(true);
         colorEnable = configuration.get(HoloInventory.MODID, "colorEnable", colorEnable, "Enable a BG color")
                 .getBoolean(false);
         colorAlpha = configuration.get(HoloInventory.MODID, "colorAlpha", colorAlpha, "The BG transparancy (0-255)")
@@ -138,6 +142,9 @@ public class Config {
                 "renderSuffixDarkened",
                 renderSuffixDarkened,
                 "Render the stacksize suffix darkened").getBoolean(true);
+        renderThirdPerson = configuration
+                .get(HoloInventory.MODID, "renderThirdPerson", renderThirdPerson, "Render in third person mode")
+                .getBoolean(false);
         renderMultiple = configuration.get(
                 HoloInventory.MODID,
                 "renderMultiple",

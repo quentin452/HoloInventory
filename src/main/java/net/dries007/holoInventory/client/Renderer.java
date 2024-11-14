@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,7 +52,6 @@ import net.minecraftforge.fluids.IFluidHandler;
 
 import org.lwjgl.opengl.GL11;
 
-import codechicken.nei.ItemList;
 import codechicken.nei.NEIClientConfig;
 import codechicken.nei.SearchField;
 import codechicken.nei.api.ItemFilter;
@@ -71,6 +69,8 @@ public class Renderer {
 
     private Coord coord;
     public boolean enabled = true;
+    // used in Angelica to control when this renderer should be active
+    public boolean angelicaOverride = false;
 
     // copy of RenderManager#renderPosX and its cousins. we need to calculate these ourselves as they can be broken
     // by optifine
@@ -93,7 +93,7 @@ public class Renderer {
     // change to RenderGameOverlayEvent so shaders don't effect the render.
     @SubscribeEvent
     public void renderEvent(RenderGameOverlayEvent event) {
-        if (!enabled || event.type != ElementType.HELMET) {
+        if (!enabled || event.type != ElementType.HELMET || angelicaOverride) {
             return;
         }
         final EntityPlayer player = Minecraft.getMinecraft().thePlayer;
@@ -114,7 +114,7 @@ public class Renderer {
         final Minecraft mc = Minecraft.getMinecraft();
         if (mc.renderEngine == null || RenderManager.instance == null
                 || RenderManager.instance.getFontRenderer() == null
-                || mc.gameSettings.thirdPersonView != 0
+                || (mc.gameSettings.thirdPersonView != 0 && !Config.renderThirdPerson)
                 || mc.objectMouseOver == null) {
             return;
         }
@@ -186,6 +186,8 @@ public class Renderer {
                     if (entity instanceof IMerchant && merchantMap.containsKey(id)) renderMerchant(merchantMap.get(id));
                 }
                 break;
+            default:
+                break;
         }
 
         if (FMLClientHandler.instance().hasOptifine()) {
@@ -245,24 +247,6 @@ public class Renderer {
     }
 
     /**
-     * Recreate the item filter from updated NEI search string
-     *
-     * @param s_filter new search string
-     */
-    private ItemFilter getFilter(String s_filter) {
-        cachedSearch = s_filter;
-        List<ItemFilter> primary = new LinkedList<>();
-        List<ItemFilter> secondary = new LinkedList<>();
-        for (SearchField.ISearchProvider p : SearchField.searchProviders) {
-            ItemFilter filter = p.getFilter(s_filter);
-            if (filter != null) (p.isPrimary() ? primary : secondary).add(filter);
-        }
-        if (!primary.isEmpty()) return new ItemList.AnyMultiItemFilter(primary);
-        if (!secondary.isEmpty()) return new ItemList.AnyMultiItemFilter(secondary);
-        return new ItemList.EverythingItemFilter();
-    }
-
-    /**
      * Filter items by NEI search string
      *
      * @param namedData Data containing array of items in the inventory
@@ -274,7 +258,10 @@ public class Renderer {
             if (Config.hideItemsNotSelected && Loader.isModLoaded("NotEnoughItems")
                     && SearchField.searchInventories()) {
                 final String searchString = NEIClientConfig.getSearchExpression().toLowerCase();
-                if (!cachedSearch.equals(searchString) || cachedFilter == null) cachedFilter = getFilter(searchString);
+                if (!cachedSearch.equals(searchString) || cachedFilter == null) {
+                    cachedFilter = SearchField.getFilter(searchString);
+                    cachedSearch = searchString;
+                }
                 return Arrays.stream(items).filter(s -> cachedFilter.matches(s)).collect(Collectors.toList());
             }
         } catch (Exception ex) {

@@ -1,5 +1,7 @@
 package net.dries007.holoInventory.client;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -10,8 +12,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
@@ -22,6 +26,10 @@ import net.minecraftforge.fluids.FluidTankInfo;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+import com.google.common.base.Throwables;
+
+import twilightforest.item.TFItems;
+
 /**
  * Keeps track of render scale, spacing, etc. to draw a set of icons prettier
  */
@@ -30,6 +38,36 @@ public class GroupRenderer {
     private static float time;
     private final EntityItem fakeEntityItem = new EntityItem(Minecraft.getMinecraft().theWorld);
     private static final int TEXT_COLOR = 255 + (255 << 8) + (255 << 16) + (170 << 24);
+    private static final MethodHandle angelicaFancyItemsSetter, angelicaFancyItemsGetter;
+    // used for TF maps that cause issues with angelica and holoinventory
+    private static final ItemStack emptyMagicMap, emptyMazeMap, emptyOreMap;
+
+    static {
+        MethodHandle fancyItemsSetter, fancyItemsGetter;
+        try {
+            final Class<?> notfineSettingsManager = Class.forName("jss.notfine.core.SettingsManager");
+            final MethodHandles.Lookup lookup = MethodHandles.publicLookup();
+            fancyItemsSetter = lookup.findStaticSetter(notfineSettingsManager, "droppedItemDetail", boolean.class);
+            fancyItemsGetter = lookup.findStaticGetter(notfineSettingsManager, "droppedItemDetail", boolean.class);
+            boolean currentValue = (boolean) fancyItemsGetter.invokeExact();
+            fancyItemsSetter.invokeExact((boolean) currentValue);
+        } catch (Throwable t) {
+            fancyItemsSetter = null;
+            fancyItemsGetter = null;
+        }
+        angelicaFancyItemsSetter = fancyItemsSetter;
+        angelicaFancyItemsGetter = fancyItemsGetter;
+
+        if (HoloInventory.isTFLoaded) {
+            emptyMagicMap = new ItemStack(TFItems.emptyMagicMap);
+            emptyMazeMap = new ItemStack(TFItems.emptyMazeMap);
+            emptyOreMap = new ItemStack(TFItems.emptyOreMap);
+        } else {
+            emptyMagicMap = null;
+            emptyMazeMap = null;
+            emptyOreMap = null;
+        }
+    }
 
     // changed with an attached debugger..
     static int stackSizeDebugOverride = 0;
@@ -125,7 +163,24 @@ public class GroupRenderer {
      */
     private void renderItem(ItemStack itemStack, int column, int row) {
         if (itemStack == null) return;
-        ItemStack renderStack = itemStack.copy();
+        ItemStack renderStack = null;
+
+        // TF maps uses a different item entity renderer which causes issues with holo and Angelica
+        // couldn't figure a way to get it to work in TF but not break anything so lets go with this
+        // solution: render empty map type instead
+        if (HoloInventory.isTFLoaded) {
+            Item renderItem = itemStack.getItem();
+            if (renderItem == TFItems.magicMap) {
+                renderStack = emptyMagicMap;
+            } else if (renderItem == TFItems.oreMap) {
+                renderStack = emptyOreMap;
+            } else if (renderItem == TFItems.mazeMap) {
+                renderStack = emptyMazeMap;
+            }
+        }
+
+        if (renderStack == null) renderStack = itemStack.copy();
+
         if (!Config.renderMultiple) {
             renderStack.stackSize = 1;
         }
@@ -165,10 +220,31 @@ public class GroupRenderer {
         GL11.glTranslatef(width - ((column + 0.2f) * scale * spacing), height - ((row + 0.05f) * scale * spacing), 0f);
         GL11.glTranslatef(0, offset, 0);
         GL11.glScalef(scale, scale, scale);
-        if (Minecraft.getMinecraft().gameSettings.fancyGraphics)
-            GL11.glRotatef(Config.rotateItems ? time : 0f, 0.0F, 1.0F, 0.0F);
-        else GL11.glRotatef(RenderManager.instance.playerViewY, 0.0F, 1.0F, 0.0F);
+        RenderItem.renderInFrame = true;
+        GL11.glRotatef(Config.rotateItems ? time : 180f, 0.0F, 1.0F, 0.0F);
+        final boolean oldFancyGraphics;
+        if (angelicaFancyItemsSetter != null) {
+            try {
+                oldFancyGraphics = (boolean) angelicaFancyItemsGetter.invokeExact();
+                angelicaFancyItemsSetter.invokeExact(true);
+            } catch (Throwable t) {
+                throw Throwables.propagate(t);
+            }
+        } else {
+            oldFancyGraphics = Minecraft.getMinecraft().gameSettings.fancyGraphics;
+            Minecraft.getMinecraft().gameSettings.fancyGraphics = true;
+        }
         ClientHandler.RENDER_ITEM.doRender(fakeEntityItem, 0, 0, 0, 0, 0);
+        if (angelicaFancyItemsSetter != null) {
+            try {
+                angelicaFancyItemsSetter.invokeExact((boolean) oldFancyGraphics);
+            } catch (Throwable t) {
+                throw Throwables.propagate(t);
+            }
+        } else {
+            Minecraft.getMinecraft().gameSettings.fancyGraphics = oldFancyGraphics;
+        }
+        RenderItem.renderInFrame = false;
         GL11.glPopMatrix();
         RenderHelper.disableStandardItemLighting();
         if (renderText && stackSizeText != null) {

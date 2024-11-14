@@ -46,13 +46,15 @@ import cpw.mods.fml.relauncher.Side;
 
 @Mod(
         modid = HoloInventory.MODID,
-        name = HoloInventory.MODID,
+        name = "Holo Inventory",
+        version = HoloInventory.VERSION,
         acceptableRemoteVersions = "*",
-        dependencies = "after:Baubles;after:TConstruct")
+        acceptedMinecraftVersions = "[1.7.10]",
+        dependencies = "after:Baubles;after:TConstruct;after:TwilightForest")
 public class HoloInventory {
 
-    public static final String MODID = "GRADLETOKEN_MODID";
-    public static final String VERSION = "GRADLETOKEN_VERSION";
+    public static final String MODID = "holoinventory";
+    public static final String VERSION = Tags.VERSION;
 
     @Mod.Instance(value = MODID)
     private static HoloInventory instance;
@@ -72,7 +74,7 @@ public class HoloInventory {
     private SimpleNetworkWrapper snw;
     private Logger logger;
 
-    public static boolean isBaublesLoaded, isTinkersLoaded, isAE2Loaded = false;
+    public static boolean isBaublesLoaded, isTinkersLoaded, isAE2Loaded, isTFLoaded = false;
 
     @Mod.EventHandler()
     public void preInit(FMLPreInitializationEvent event) {
@@ -80,6 +82,7 @@ public class HoloInventory {
         isBaublesLoaded = Loader.isModLoaded("Baubles");
         isTinkersLoaded = Loader.isModLoaded("TConstruct");
         isAE2Loaded = Loader.isModLoaded("appliedenergistics2");
+        isTFLoaded = Loader.isModLoaded("TwilightForest");
 
         logger = event.getModLog();
         config = new Config(event.getSuggestedConfigurationFile());
